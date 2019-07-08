@@ -1,0 +1,22 @@
+[
+  {
+    "name": "ascent-demo",
+    "image": "${image}",
+    "portMappings": [
+      {
+        "containerPort": 5000
+      }
+    ],
+    "memory": 128,
+    "networkMode": "awsvpc",
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "${log_group}",
+        "awslogs-region": "us-east-1",
+        "awslogs-stream-prefix": "web"
+      }
+    }
+  }
+]
+
