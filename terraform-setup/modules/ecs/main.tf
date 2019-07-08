@@ -25,8 +25,8 @@ data "template_file" "web_task" {
   template = "${file("${path.module}/tasks/web_task_definition.json")}"
 
   vars = {
-    image           = "${data.aws_ecr_repository.demo-repo.repository_url}"
-    log_group       = "${aws_cloudwatch_log_group.demo.name}"
+    image     = "${data.aws_ecr_repository.demo-repo.repository_url}"
+    log_group = "${aws_cloudwatch_log_group.demo.name}"
   }
 }
 
@@ -47,10 +47,10 @@ resource "random_id" "target_group_suffix" {
 }
 
 resource "aws_alb_target_group" "alb_target_group" {
-  name     = "alb-target-group-${random_id.target_group_suffix.hex}"
-  port     = 5000
-  protocol = "HTTP"
-  vpc_id   = "${var.vpc_id}"
+  name        = "alb-target-group-${random_id.target_group_suffix.hex}"
+  port        = 5000
+  protocol    = "HTTP"
+  vpc_id      = "${var.vpc_id}"
   target_type = "ip"
 
   lifecycle {
@@ -116,10 +116,10 @@ resource "aws_alb_listener" "ascent-demo-listener" {
 /* ==== IAM service role ==== */
 data "aws_iam_policy_document" "ecs_service_role" {
   statement {
-    effect = "Allow"
+    effect  = "Allow"
     actions = ["sts:AssumeRole"]
     principals {
-      type = "Service"
+      type        = "Service"
       identifiers = ["ecs.amazonaws.com"]
     }
   }
@@ -132,7 +132,7 @@ resource "aws_iam_role" "ecs_role" {
 
 data "aws_iam_policy_document" "ecs_service_policy" {
   statement {
-    effect = "Allow"
+    effect    = "Allow"
     resources = ["*"]
     actions = [
       "elasticloadbalancing:Describe*",
@@ -146,7 +146,7 @@ data "aws_iam_policy_document" "ecs_service_policy" {
 
 /* ecs service scheduler role */
 resource "aws_iam_role_policy" "ecs_service_role_policy" {
-  name   = "ecs_service_role_policy"
+  name = "ecs_service_role_policy"
   #policy = "${file("${path.module}/policies/ecs-service-role.json")}"
   policy = "${data.aws_iam_policy_document.ecs_service_policy.json}"
   role   = "${aws_iam_role.ecs_role.id}"
@@ -194,7 +194,7 @@ resource "aws_security_group" "ecs_service" {
 /* Simply specify the family to find the latest ACTIVE revision in that family */
 data "aws_ecs_task_definition" "web" {
   task_definition = "${aws_ecs_task_definition.web.family}"
-  depends_on = [ "aws_ecs_task_definition.web" ]
+  depends_on      = ["aws_ecs_task_definition.web"]
 }
 
 resource "aws_ecs_service" "ascent-demo" {
@@ -202,12 +202,12 @@ resource "aws_ecs_service" "ascent-demo" {
   task_definition = "${aws_ecs_task_definition.web.family}:${max("${aws_ecs_task_definition.web.revision}", "${data.aws_ecs_task_definition.web.revision}")}"
   desired_count   = 2
   launch_type     = "FARGATE"
-  cluster =       "${aws_ecs_cluster.cluster.id}"
+  cluster         = "${aws_ecs_cluster.cluster.id}"
   depends_on      = ["aws_iam_role_policy.ecs_service_role_policy"]
 
   network_configuration {
     security_groups = flatten(["${var.security_groups_ids}", "${aws_security_group.ecs_service.id}"])
-    subnets         = flatten(["${var.subnets_ids}"])
+    subnets         = flatten(["${var.private_subnet_ids}"])
   }
 
   load_balancer {
@@ -240,10 +240,10 @@ resource "aws_appautoscaling_target" "target" {
 }
 
 resource "aws_appautoscaling_policy" "up" {
-  name                    = "${var.environment}_scale_up"
-  service_namespace       = "ecs"
-  resource_id             = "service/${aws_ecs_cluster.cluster.name}/${aws_ecs_service.ascent-demo.name}"
-  scalable_dimension      = "ecs:service:DesiredCount"
+  name               = "${var.environment}_scale_up"
+  service_namespace  = "ecs"
+  resource_id        = "service/${aws_ecs_cluster.cluster.name}/${aws_ecs_service.ascent-demo.name}"
+  scalable_dimension = "ecs:service:DesiredCount"
 
 
   step_scaling_policy_configuration {
@@ -253,7 +253,7 @@ resource "aws_appautoscaling_policy" "up" {
 
     step_adjustment {
       metric_interval_lower_bound = 0
-      scaling_adjustment = 1
+      scaling_adjustment          = 1
     }
   }
 
@@ -261,10 +261,10 @@ resource "aws_appautoscaling_policy" "up" {
 }
 
 resource "aws_appautoscaling_policy" "down" {
-  name                    = "${var.environment}_scale_down"
-  service_namespace       = "ecs"
-  resource_id             = "service/${aws_ecs_cluster.cluster.name}/${aws_ecs_service.ascent-demo.name}"
-  scalable_dimension      = "ecs:service:DesiredCount"
+  name               = "${var.environment}_scale_down"
+  service_namespace  = "ecs"
+  resource_id        = "service/${aws_ecs_cluster.cluster.name}/${aws_ecs_service.ascent-demo.name}"
+  scalable_dimension = "ecs:service:DesiredCount"
 
   step_scaling_policy_configuration {
     adjustment_type         = "ChangeInCapacity"
@@ -273,7 +273,7 @@ resource "aws_appautoscaling_policy" "down" {
 
     step_adjustment {
       metric_interval_lower_bound = 0
-      scaling_adjustment = -1
+      scaling_adjustment          = -1
     }
   }
 

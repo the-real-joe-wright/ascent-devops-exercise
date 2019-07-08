@@ -9,7 +9,7 @@ provider "aws" {
   region     = "${var.aws_region}"
 }
 
-module "networking" {
+module "vpc" {
   source               = "./modules/vpc"
   environment          = "ascent-demo"
   vpc_cidr             = "10.0.0.0/16"
@@ -21,13 +21,11 @@ module "networking" {
 
 module "ecs" {
   source              = "./modules/ecs"
-  environment          = "ascent-demo"
-  vpc_id              = "${module.networking.vpc_id}"
+  environment         = "ascent-demo"
+  vpc_id              = "${module.vpc.vpc_id}"
   availability_zones  = "${local.demo_availability_zones}"
   repository_name     = "ascent-demo"
-  subnets_ids         = ["${module.networking.private_subnets_id}"]
-  public_subnet_ids   = ["${module.networking.public_subnets_id}"]
-  security_groups_ids = [
-    "${module.networking.security_groups_ids}"
-  ]
+  private_subnet_ids  = ["${module.vpc.private_subnets_id}"]
+  public_subnet_ids   = ["${module.vpc.public_subnets_id}"]
+  security_groups_ids = ["${module.vpc.security_groups_ids}"]
 }
