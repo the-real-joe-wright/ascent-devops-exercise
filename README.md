@@ -5,7 +5,7 @@ This is Joe Wright's DevOps exercise for Ascent. Thank you for giving me the opp
 Let's start at the end: the Terraform code has been used to build an ECS cluster which can be reached at: 
 [http://ascent-demo-alb-1963194294.us-east-1.elb.amazonaws.com](http://ascent-demo-alb-1963194294.us-east-1.elb.amazonaws.com)
 
-That's a lot to type, so let's make it easier: [http://ascent-demo.joewright.org](http://ascent-demo.joewright.org)
+That's a lot to type, so let's make it easier with a CNAME: [http://ascent-demo.joewright.org](http://ascent-demo.joewright.org)
 
 # Code layout
 The [repository root](https://github.com/the-real-joe-wright/ascent-devops) contains the Dockerized version of the application code (Steps 1-2 of the exercise).  
